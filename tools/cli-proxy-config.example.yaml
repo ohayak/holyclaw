@@ -1,0 +1,11 @@
+host: "0.0.0.0"
+port: 8317
+auth-dir: "/CLIProxyAPI/auths"
+logging-to-file: false
+debug: false
+request-retry: 3
+usage-statistics-enabled: true
+remote-management:
+  allow-remote: true
+routing:
+  strategy: "round-robin"

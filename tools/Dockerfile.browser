@@ -1,0 +1,25 @@
+FROM kasmweb/chrome:1.16.1
+
+USER root
+
+# Install Caddy for CDP reverse proxy
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends apt-transport-https curl gnupg \
+ && curl -1sLf https://dl.cloudsmith.io/public/caddy/stable/gpg.key | gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg \
+ && curl -1sLf https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt > /etc/apt/sources.list.d/caddy-stable.list \
+ && apt-get update \
+ && apt-get install -y --no-install-recommends caddy \
+ && rm -rf /var/lib/apt/lists/*
+
+# Patch Chrome wrapper to enable CDP
+RUN sed -i "s|/opt/google/chrome/google-chrome --password-store|/opt/google/chrome/google-chrome --remote-debugging-port=9223 --remote-allow-origins=* --password-store|g" /usr/bin/google-chrome
+
+# Caddyfile: proxy 0.0.0.0:9222 -> localhost:9223 with Host rewrite for CDP
+RUN printf ":9222 {\n\treverse_proxy 127.0.0.1:9223 {\n\t\theader_up Host localhost\n\t}\n}\n" > /etc/caddy/Caddyfile
+
+# Inline entrypoint: start Caddy then hand off to Kasm
+RUN printf "#!/bin/bash\ncaddy start --config /etc/caddy/Caddyfile 2>/dev/null &\nexec /dockerstartup/kasm_default_profile.sh /dockerstartup/vnc_startup.sh /dockerstartup/kasm_startup.sh\n" > /entrypoint.sh \
+ && chmod +x /entrypoint.sh
+
+USER 1000
+ENTRYPOINT ["/entrypoint.sh"]

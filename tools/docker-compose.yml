@@ -1,0 +1,71 @@
+services:
+  cliproxy:
+    image: eceasy/cli-proxy-api-plus:latest
+    pull_policy: always
+    container_name: cliproxy
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - MANAGEMENT_PASSWORD=${CLIPROXY_PASSWORD}
+    expose:
+      - "8317"
+      # Auth ports
+      - "8085" # Gemini 
+      - "51121" # Antigraviti
+      - "54545" # Claude
+      - "1455" # codex
+      - "11451" # iFlow
+    volumes:
+      - ./cli-proxy-config.yaml:/CLIProxyAPI/config.yaml
+      - ./data/cli-proxy/auths:/CLIProxyAPI/auths
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cliproxy.rule=Host(`cliproxy.${DOMAIN}`)"
+      - "traefik.http.routers.cliproxy.entrypoints=websecure"
+      - "traefik.http.routers.cliproxy.tls=true"
+      - "traefik.http.routers.cliproxy.tls.certresolver=letsencrypt"
+      - "traefik.http.services.cliproxy.loadbalancer.server.port=8317"
+    networks:
+      - tools
+
+  browser:
+    build:
+      context: .
+      dockerfile: Dockerfile.browser
+    container_name: browser
+    restart: unless-stopped
+    shm_size: "512m"
+    environment:
+      - VNC_PW=${VNC_PASSWORD}
+      - KASM_PORT=6901
+    expose:
+      - "9222"
+      - "6901"
+    volumes:
+      - ./data/browser:/home/kasm-user
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.browser.rule=Host(`browser.${DOMAIN}`)"
+      - "traefik.http.routers.browser.entrypoints=websecure"
+      - "traefik.http.routers.browser.tls=true"
+      - "traefik.http.routers.browser.tls.certresolver=letsencrypt"
+      - "traefik.http.services.browser.loadbalancer.server.port=6901"
+      - "traefik.http.services.browser.loadbalancer.server.scheme=https"
+    networks:
+      - tools
+  
+  headless-browser:
+    image: lightpanda/browser:latest
+    pull_policy: always
+    container_name: headless-browser
+    restart: unless-stopped
+    expose:
+      - "9222"
+    networks:
+      - tools
+
+networks:
+  tools:
+    name: tools
+    driver: bridge
