@@ -38,7 +38,7 @@
   "models": {
     "mode": "merge",
     "providers": {
-      "openai": {
+      "cliproxy": {
         "baseUrl": "${CLIPROXY_BASE_URL}",
         "apiKey": "${CLIPROXY_API_KEY}",
         "api": "openai-completions",
@@ -49,13 +49,13 @@
   "agents": {
     "defaults": {
       "model": {
-        "primary": "openai/claude-opus-4-6",
+        "primary": "cliproxy/claude-opus-4-6",
         "fallbacks": [
-          "openai/claude-sonnet-4-6"
+          "cliproxy/claude-sonnet-4-6"
         ]
       },
       "models": {
-        "openai/claude-opus-4-6": {
+        "cliproxy/claude-opus-4-6": {
           "params": { "context1m" : true }
         }
       },
@@ -67,7 +67,7 @@
         "experimental": {
           "sessionMemory": true
         },
-        "model": "openai/claude-haiku-4-5",
+        "model": "cliproxy/claude-haiku-4-5",
         "store": {
           "vector": {
             "enabled": true
@@ -113,7 +113,7 @@
       },
       "compaction": {
         "reserveTokensFloor": 20000,
-        "model": "openai/claude-haiku-4-5",
+        "model": "cliproxy/claude-haiku-4-5",
         "memoryFlush": {
           "enabled": true,
           "softThresholdTokens": 4000,
@@ -123,7 +123,7 @@
       },
       "heartbeat": {
         "every": "55m",
-        "model": "openai/claude-haiku-4-5",
+        "model": "cliproxy/claude-haiku-4-5",
         "lightContext": true
       },
       "thinkingDefault": "medium",
@@ -132,7 +132,7 @@
         "maxConcurrent": 8,
         "maxSpawnDepth": 3,
         "maxChildrenPerAgent": 8,
-        "model": "openai/claude-sonnet-4-6",
+        "model": "cliproxy/claude-sonnet-4-6",
         "runTimeoutSeconds": 3600
       }
     },
@@ -141,7 +141,7 @@
         "id": "main",
         "name": "main",
         "workspace": "${HOME}/.openclaw/workspaces/main",
-        "model": "openai/claude-opus-4-6",
+        "model": "cliproxy/claude-opus-4-6",
         "identity": {
           "name": "main",
           "theme": "Second brain",
