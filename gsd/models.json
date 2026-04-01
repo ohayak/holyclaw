@@ -1,0 +1,14 @@
+{
+  "providers": {
+    "anthropic": {
+      "baseUrl": "CLIPROXY_BASE_URL",
+      "apiKey": "CLIPROXY_API_KEY",
+      "api": "openai-completions"
+    },
+    "openai": {
+      "baseUrl": "CLIPROXY_BASE_URL",
+      "apiKey": "CLIPROXY_API_KEY",
+      "api": "openai-completions"
+    }
+  }
+}

@@ -15,6 +15,7 @@ services:
       - ./openclaw.json:/home/node/.openclaw/openclaw.json
       - ./data/home:/home/node
       - ./opencode.json:/home/node/.config/opencode/opencode.json
+      - /opt/workspace:/workspace
     ports:
       - "18789:18789"
       - "18790:18790"
@@ -48,39 +49,6 @@ services:
       - "traefik.http.routers.openclaw-gateway.tls=true"
       - "traefik.http.routers.openclaw-gateway.tls.certresolver=letsencrypt"
       - "traefik.http.services.openclaw-gateway.loadbalancer.server.port=18789"
-    networks:
-      - openclaw
-      - tools
-
-  cli:
-    image: alpine/openclaw:latest
-    pull_policy: always
-    container_name: openclaw-cli
-    network_mode: "service:openclaw-gateway"
-    cap_drop:
-      - NET_RAW
-      - NET_ADMIN
-    security_opt:
-      - no-new-privileges:true
-    env_file:
-      - .env
-    environment:
-      - HOME=/home/node
-      - TERM=xterm-256color
-      - OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1
-      - BROWSER=echo
-      - TZ=UTC
-    volumes:
-      - ./openclaw.json:/home/node/.openclaw/openclaw.json
-      - ./data/home:/home/node
-    stdin_open: true
-    tty: true
-    init: true
-    profiles:
-      - cli
-    entrypoint: ["node", "dist/index.js"]
-    depends_on:
-      - openclaw-gateway
     networks:
       - openclaw
       - tools

@@ -1,0 +1,49 @@
+services:
+  web:
+    build:
+      context: https://github.com/gsd-build/gsd-2.git#:docker
+      dockerfile: Dockerfile.sandbox
+      args:
+        GSD_VERSION: latest
+    image: gsd:latest
+    container_name: gsd-web
+    restart: unless-stopped
+    command: >
+      bash -c 'gsd --web --port 3000 --host 0.0.0.0 && exec tail -f /dev/null'
+    expose:
+      - "3000"
+    volumes:
+      - gsd-state:/home/gsd/.gsd
+      - /opt/workspace:/workspace
+      - ./models.json:/home/gsd/.gsd/agent/models.json:ro
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PUID=1000
+      - PGID=1000
+    stdin_open: true
+    tty: true
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gsd.rule=Host(`gsd.${DOMAIN}`)"
+      - "traefik.http.routers.gsd.entrypoints=websecure"
+      - "traefik.http.routers.gsd.tls=true"
+      - "traefik.http.routers.gsd.tls.certresolver=letsencrypt"
+      - "traefik.http.services.gsd.loadbalancer.server.port=3000"
+    networks:
+      - tools
+
+networks:
+  tools:
+    external: true
+
+volumes:
+  gsd-state:
+  gsd-workspace:

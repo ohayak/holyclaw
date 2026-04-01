@@ -6,6 +6,12 @@
                 "baseUrl": "${env:CLIPROXY_BASE_URL}",
                 "apiKey": "${env:CLIPROXY_API_KEY}"
             }
+        },
+        "anthropic": {
+            "options": {
+                "baseUrl": "${env:CLIPROXY_BASE_URL}",
+                "apiKey": "${env:CLIPROXY_API_KEY}"
+            }
         }
     }
 }

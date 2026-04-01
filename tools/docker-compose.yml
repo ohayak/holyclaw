@@ -10,12 +10,11 @@ services:
       - MANAGEMENT_PASSWORD=${CLIPROXY_PASSWORD}
     expose:
       - "8317"
-      # Auth ports
-      - "8085" # Gemini 
-      - "51121" # Antigraviti
-      - "54545" # Claude
-      - "1455" # codex
-      - "11451" # iFlow
+      - "8085"
+      - "51121"
+      - "54545"
+      - "1455"
+      - "11451"
     volumes:
       - ./cli-proxy-config.yaml:/CLIProxyAPI/config.yaml
       - ./data/cli-proxy/auths:/CLIProxyAPI/auths
@@ -36,8 +35,11 @@ services:
     container_name: browser
     restart: unless-stopped
     shm_size: "512m"
+    env_file:
+      - .env
     environment:
       - VNC_PW=${VNC_PASSWORD}
+      - XDG_RUNTIME_DIR=/tmp/runtime-kasm-user
       - KASM_PORT=6901
     expose:
       - "9222"
@@ -54,14 +56,45 @@ services:
       - "traefik.http.services.browser.loadbalancer.server.scheme=https"
     networks:
       - tools
-  
+
   headless-browser:
     image: lightpanda/browser:latest
     pull_policy: always
     container_name: headless-browser
     restart: unless-stopped
+    env_file:
+      - .env
     expose:
       - "9222"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.headless-browser.rule=Host(`headless-browser.${DOMAIN}`)"
+      - "traefik.http.routers.headless-browser.entrypoints=websecure"
+      - "traefik.http.routers.headless-browser.tls=true"
+      - "traefik.http.routers.headless-browser.tls.certresolver=letsencrypt"
+      - "traefik.http.services.headless-browser.loadbalancer.server.port=9222"
+      - "traefik.http.services.headless-browser.loadbalancer.server.scheme=https"
+    networks:
+      - tools
+
+  crawl4ai:
+    image: unclecode/crawl4ai:latest
+    container_name: crawl4ai
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - CRAWL4AI_API_TOKEN=${FIRECRAWL_API_KEY}
+      - MAX_CONCURRENT_TASKS=5
+    expose:
+      - "11235"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.crawl4ai.rule=Host(`crawl4ai.${DOMAIN}`)"
+      - "traefik.http.routers.crawl4ai.entrypoints=websecure"
+      - "traefik.http.routers.crawl4ai.tls=true"
+      - "traefik.http.routers.crawl4ai.tls.certresolver=letsencrypt"
+      - "traefik.http.services.crawl4ai.loadbalancer.server.port=11235"
     networks:
       - tools
 
